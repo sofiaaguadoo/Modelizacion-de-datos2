@@ -66,24 +66,28 @@ class Practica1Preprocess:
         """
         X = X.copy()
 
-        # ---- Feature 1: FICO medio ----
+        # Feature 1: FICO medio
         if "fico_range_low" in X.columns and "fico_range_high" in X.columns:
             X["fico_mean"] = (X["fico_range_low"] + X["fico_range_high"]) / 2
 
-        # ---- Feature 2: cuota / ingreso mensual ----
+        # Feature 2: cuota / ingreso mensual
         if "installment" in X.columns and "annual_inc" in X.columns:
             ingreso_mensual = X["annual_inc"] / 12
             ingreso_mensual = ingreso_mensual.replace(0, np.nan)
             X["installment_income_ratio"] = X["installment"] / ingreso_mensual
 
-        # ---- Feature 3: préstamo / ingreso anual ----
+        # Feature 3: préstamo / ingreso anual
         if "loan_amnt" in X.columns and "annual_inc" in X.columns:
             annual_inc_nonzero = X["annual_inc"].replace(0, np.nan)
             X["loan_income_ratio"] = X["loan_amnt"] / annual_inc_nonzero
 
-        # ---- Feature 4 y 5: año y mes de earliest_cr_line ----
+        # Feature 4 y 5: año y mes de earliest_cr_line
         if "earliest_cr_line" in X.columns:
-            fecha = pd.to_datetime(X["earliest_cr_line"], format="%b-%Y", errors="coerce")
+            fecha = pd.to_datetime(
+                X["earliest_cr_line"],
+                format="%b-%Y",
+                errors="coerce"
+            )
             X["earliest_cr_line_year"] = fecha.dt.year
             X["earliest_cr_line_month"] = fecha.dt.month
 
@@ -142,21 +146,20 @@ class Practica1Preprocess:
 
         # OrdinalEncoder para grade y sub_grade
         if len(self.ordinal_vars) > 0:
-            categories = []
+            categories_map = {
+                "grade": ["A", "B", "C", "D", "E", "F", "G"],
+                "sub_grade": [
+                    "A1", "A2", "A3", "A4", "A5",
+                    "B1", "B2", "B3", "B4", "B5",
+                    "C1", "C2", "C3", "C4", "C5",
+                    "D1", "D2", "D3", "D4", "D5",
+                    "E1", "E2", "E3", "E4", "E5",
+                    "F1", "F2", "F3", "F4", "F5",
+                    "G1", "G2", "G3", "G4", "G5"
+                ]
+            }
 
-            for var in self.ordinal_vars:
-                if var == "grade":
-                    categories.append(["A", "B", "C", "D", "E", "F", "G"])
-                elif var == "sub_grade":
-                    categories.append([
-                        "A1", "A2", "A3", "A4", "A5",
-                        "B1", "B2", "B3", "B4", "B5",
-                        "C1", "C2", "C3", "C4", "C5",
-                        "D1", "D2", "D3", "D4", "D5",
-                        "E1", "E2", "E3", "E4", "E5",
-                        "F1", "F2", "F3", "F4", "F5",
-                        "G1", "G2", "G3", "G4", "G5"
-                    ])
+            categories = [categories_map[var] for var in self.ordinal_vars]
 
             self.ordinal_encoder = OrdinalEncoder(
                 categories=categories,
@@ -177,7 +180,9 @@ class Practica1Preprocess:
         X_encoded = X_fit.copy()
 
         if len(self.ordinal_vars) > 0:
-            X_encoded[self.ordinal_vars] = self.ordinal_encoder.transform(X_encoded[self.ordinal_vars])
+            X_encoded[self.ordinal_vars] = self.ordinal_encoder.transform(
+                X_encoded[self.ordinal_vars]
+            )
 
         if len(self.freq_vars) > 0:
             X_freq = self.freq_encoder.transform(X_encoded[self.freq_vars])
@@ -219,7 +224,9 @@ class Practica1Preprocess:
 
         # Encoding ordinal
         if len(self.ordinal_vars) > 0:
-            X_data[self.ordinal_vars] = self.ordinal_encoder.transform(X_data[self.ordinal_vars])
+            X_data[self.ordinal_vars] = self.ordinal_encoder.transform(
+                X_data[self.ordinal_vars]
+            )
 
         # Frequency encoding
         if len(self.freq_vars) > 0:
@@ -229,7 +236,9 @@ class Practica1Preprocess:
 
         # Escalado final
         if len(self.final_numeric_vars) > 0:
-            X_data[self.final_numeric_vars] = self.scaler.transform(X_data[self.final_numeric_vars])
+            X_data[self.final_numeric_vars] = self.scaler.transform(
+                X_data[self.final_numeric_vars]
+            )
 
         # Por seguridad, sustituimos infinitos por NaN y luego rellenamos cualquier NaN residual
         X_data = X_data.replace([np.inf, -np.inf], np.nan)
