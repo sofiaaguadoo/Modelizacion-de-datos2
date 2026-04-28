@@ -14,6 +14,6 @@ Este repositorio contiene la resolución de la práctica 1 de predicción de imp
 - `data/variables_withExperts.xlsx`
 
 ### Modelos evaluados
-- Random Forest
+- HistGradientBoosting
 - SVM
 - MLP
