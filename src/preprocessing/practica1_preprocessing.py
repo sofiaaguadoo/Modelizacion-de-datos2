@@ -14,7 +14,7 @@ class Practica1Preprocess:
     - Usa variables_withExperts.xlsx
     - Imputación distinta:
         * numéricas -> mediana
-        * categóricas -> most_frequent
+        * categóricas -> categoría constante "missing"
     - Categóricas:
         * grade y sub_grade con OrdinalEncoder
         * resto con CountFrequencyEncoder
@@ -130,9 +130,9 @@ class Practica1Preprocess:
         if len(self.numeric_vars) > 0:
             self.num_imputer = SimpleImputer(strategy="median")
             self.num_imputer.fit(X_train[self.numeric_vars])
-
+            
         if len(self.categoric_vars) > 0:
-            self.cat_imputer = SimpleImputer(strategy="most_frequent")
+            self.cat_imputer = SimpleImputer(strategy="constant", fill_value="missing")
             self.cat_imputer.fit(X_train[self.categoric_vars])
 
         # Imputamos una copia para poder ajustar encoders y scaler
